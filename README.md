@@ -1,5 +1,7 @@
 # Class 3
 
+See also the Scala intro in the class notes of [Class 2](https://github.com/nyu-pl-fa18/class02).
+
 ## Control Flow
 
 *Control flow* determines the order in which things get done in a
@@ -10,7 +12,7 @@ program. The primary mechanisms for control flow are:
   
 * *Selection* or *alternation*: make a choice based on some condition at run-time
   * conditional statements (`if` statements)
-  * `case` statements (aka `match` or `switch` statements)
+  * `choice` statements (aka `match` or `switch` statements)
 
 * *Iteration*: execute a piece of code repeatedly
   
@@ -38,8 +40,8 @@ Additional mechanisms for control flow include
   computation
   
 We will look at these advanced mechanisms throughout the
-semester. Today's focus will be on the primary mechanisms listed
-above.
+semester. Today's focus will be on the primary control flow mechanisms
+listed above.
 
 ### Sequencing
 
@@ -88,14 +90,10 @@ this expression in Scala:
 
 Which of the following calculations does this expression correspond to?
 
-* ```scala
-((6 + 2) * 3) > 2```
-* ```scala 
-(6 + (2 * 3)) > 2```
-* ```scala 
-6 + ((2 * 3) > 2)```
-* ```scala
-6 + (2 * (3 > 2))```
+* ```((6 + 2) * 3) > 2```
+* ```(6 + (2 * 3)) > 2```
+* ```6 + ((2 * 3) > 2)```
+* ```6 + (2 * (3 > 2))```
 
 The order in which different infix operators are evaluated in an
 expression is determined by *operator precedence*. Operators with
@@ -158,7 +156,7 @@ as being *referentially transparent*, meaning that it is possible to
 replace any expression in a program with the value that it computes
 without changing the behavior of the program.
 
-Examples
+Classification of some languages (imperative vs. functional)
 * Imperative: C, Pascal
 * Mostly imperative: Java, C#, Python, Ruby
 * Mostly functional: Scala, OCaml, Lisp
@@ -245,7 +243,7 @@ or conditional (on a very simple condition, e.g. checking whether the
 value of a particular CPU register is `0`).
 
 With branch instructions, we can implement loops, conditional
-statements, and case statements. In fact, we only need
+statements, and choice statements. In fact, we only need
 * increment by 1
 * decrement by 1
 * branch on 0
@@ -370,11 +368,11 @@ Solutions:
 
 #### Multiway selection
 
-A case statement (or case expression) is needed when there are many
+A choice statement (or choice expression) is needed when there are many
 possibilities *at the same logical level* (i.e. depending on the same
 condition).
 
-Here is how we'd write a case statement in Ada:
+Here is how we'd write a choice statement in Ada:
 
 ```ada
 case Next_Char is
@@ -417,11 +415,11 @@ val = nextChar match {
 }
 ```
 
-Case statements can be simulated by a sequence of conditional
-statements, but the logic is obscured. Moreover, case statements can
+Choice statements can be simulated by a sequence of conditional
+statements, but the logic is obscured. Moreover, choice statements can
 often be translated more efficiently to machine language than a
 sequence of conditional statements. Specifically, in C/C++/Java/Ada
-style case statements, we always have a finite set of possible
+style choice statements, we always have a finite set of possible
 choices to select from, which can be determined at compile time:
 
 * build table of addresses, one for each choice
@@ -429,16 +427,16 @@ choices to select from, which can be determined at compile time:
 * transform value into table index
 * get table element at index and branch to that address
 * execute statement for selected choice
-* branch to end of the case statement
+* branch to end of the choice statement
 
 This is not the typical implementation for a Scala/OCaml/Haskell style
-case expressions. As we shall see later this semester, these languages
-support more powerful case expressions that involve a more complex
+choice expressions. As we shall see later this semester, these languages
+support more powerful choice expressions that involve a more complex
 translation to machine language.
 
-##### Fall-through semantics of case statements
+##### Fall-through semantics of choice statements
 
-C's case statement, called `switch`, has a special *fall-through*
+C's choice statement, called `switch`, has a special *fall-through*
 semantics that you should be aware of. Consider the following
 literal translation of our earlier example from Scala to C:
 
@@ -592,7 +590,7 @@ while (condition) statement
 
 * otherwise, the loop exits.
 
-* if `condition` is initially `false, `statement` is never executed.
+* if `condition` is initially `false`, `statement` is never executed.
 
 Thus, we have that
 
@@ -819,8 +817,47 @@ for (Iterator<Object> iter = xs.iterator(); iter.hasNext();) {
 
 Languages such as Python and Scala generalize `for` loops to
 expressions that compute new iterable collections from existing
-ones. For instance, the following Scala code computes the sequence of prime
-numbers in the interval `[1,20]`:
+ones. In Scala a `for` expression takes the form:
+
+```scala
+for (x <- e1) yield e2
+```
+
+respectively
+
+```scala
+for (x <- e1) e2
+```
+
+In both cases, the `for` expression declares the variable `x` whose
+scope is the entire expression. The expression `e1` must evaluate to
+some form of collection type (e.g. a list) over which the `for`
+expression iterates. In each iteration, `x` is bound to the next value
+stored in `e1` and then evaluates the expression `e2`. The difference
+between the two variants is that the `yield` version creates a new
+collection that stores the values obtained from evaluating the
+expression `e2` in each iteration. The result value of the `for`
+expression is this new collection. The second variant instead simply
+evaluates `e2` for the purpose of its side effect, similar to a normal
+`for` loop. 
+
+Here is a simple example that computes a collection holding the
+squares of all values from `1` to `20`:
+
+```scala
+for (x <- 1 to 20) yield x * x
+```
+
+And here is another example that simply prints all those squares:
+
+```scala
+for (x <- 1 to 20) { println(x * x) }
+```
+
+`for` expressions also allow to add filters that cause some of the
+values in the collection that we iterate over to be skipped.  For
+instance, the following Scala code uses this feature to compute the
+sequence of prime numbers in the interval `[1,20]`:
 
 ```scala
 def factors(x: Int) =
